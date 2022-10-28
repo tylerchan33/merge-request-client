@@ -8,6 +8,7 @@ export default function Swipe({currentUser}) {
     const [users, setUsers] = useState([])
     const [lookingForUsers, setLookingForUsers] = useState([])
     const [lookingFor, setLookingFor] = useState("No Preference")
+    const [swiper, setSwiper] = useState({})
     const { userId } = useParams()
     const [lastDirection, setLastDirection] = useState('')
 
@@ -42,6 +43,19 @@ export default function Swipe({currentUser}) {
             console.warn(err)
         }
     }
+
+    useEffect(() => {
+        const getUser = async () => {
+            try {
+                const response = await axios.get(`${process.env.REACT_APP_SERVER_URL}/api-v1/users/${userId}`)
+                console.log(response.data)
+                setSwiper(response.data)
+            } catch(err) {
+                console.warn(err)
+            }
+        }
+        getUser()
+    }, [userId])
 
     useEffect(() => {
         getAllUsers()
@@ -296,6 +310,11 @@ export default function Swipe({currentUser}) {
 
     const blankCard = <div>No More Matches</div>
 
+    // const test = ["123", "456", "789"]
+    // console.log("testresults", !test.includes("123"))
+    console.log(swiper.likedUsers)
+    
+
     return(
     <div>
         <h1>The Swipe Page</h1>
@@ -319,9 +338,12 @@ export default function Swipe({currentUser}) {
                     preventSwipe={['up', 'down']}
                     onSwipe={dir => swiped(dir, user.firstName, user.id)}
                     onCardLeftScreen={() => outOfFrame(user.firstName)}>
-                        <div className='card' style={{backgroundImage: `url(${user.photos})`}}>
+                        {currentUser.id !== user.id && !swiper.likedUsers.includes(user.id) && !swiper.rejectedUsers.includes(user.id) ? <div className='card' style={{backgroundImage: `url(${user.photos})`}}>
                             <h1 className='card'>{user.firstName}</h1>
-                        </div>
+                        </div>:
+                        <div></div>
+                        }
+                        
                     </TinderCard>
                 ))}
                 </div>
